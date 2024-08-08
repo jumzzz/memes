@@ -1,0 +1,9 @@
+# Create a partial masking function
+spark.sql("""
+CREATE OR REPLACE FUNCTION partial_mask(full_name STRING)
+RETURNS STRING
+RETURN REGEXP_REPLACE(
+    REGEXP_REPLACE(full_name, '(\\S{2})\\S+', '$1' || REPEAT('*', LENGTH(REGEXP_EXTRACT(full_name, '\\S+', 0)) - 2)),
+    '(\\S+\\s+)(\\S{2})\\S+', '$1$2' || REPEAT('*', LENGTH(REGEXP_EXTRACT(full_name, '\\S+\\s+(\\S+)', 1)) - 2)
+)
+""")
