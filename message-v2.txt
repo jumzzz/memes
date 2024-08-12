@@ -1,0 +1,37 @@
+# Create a partial masking function
+spark.sql("""
+CREATE OR REPLACE FUNCTION partial_mask(full_name STRING)
+RETURNS STRING
+RETURN REGEXP_REPLACE(
+    REGEXP_REPLACE(full_name, '(\\S{2})\\S+', '$1' || REPEAT('*', LENGTH(REGEXP_EXTRACT(full_name, '\\S+', 0)) - 2)),
+    '(\\S+\\s+)(\\S{2})\\S+', '$1$2' || REPEAT('*', LENGTH(REGEXP_EXTRACT(full_name, '\\S+\\s+(\\S+)', 1)) - 2)
+)
+""")
+
+
+# phone and fax
+^(?:\+1|1)?[-.\s]?\(?[2-9]\d{2}\)?[-.\s]?\d{3}[-.\s]?\d{4}$
+# email
+^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$
+# ssn
+^(?!000|666|9\d{2})\d{3}-(?!00)\d{2}-(?!0000)\d{4}$
+# med records
+^MRN-\d{8}$
+# health plan beneficiary numbers
+^[A-Z]{3}\d{6}[A-Z]{2}$
+# account numbers 
+^\d{10,16}$
+# cert/license numbers
+^[A-Z]{2}\d{6}[A-Z]$
+# vehicle identifiers and serial numbers
+^[A-HJ-NPR-Z0-9]{17}$
+# general serial numbers
+^[A-Z0-9]{8,12}$
+# device identifiers
+^[A-Z0-9]{4,20}(-[A-Z0-9]{4,20}){0,3}$
+# web urls 
+^(https?:\/\/)?(www\.)?[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})+([\/\w \.-]*)*\/?$
+# ipv4 address
+\b(?:(?:2[0-5]{2}|1?\d{1,2})\.){3}(?:2[0-5]{2}|1?\d{1,2})\b
+# ipv6
+\b(?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}\b
